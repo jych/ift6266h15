@@ -7,10 +7,13 @@ import random
 import tables
 import tarfile
 import theano.tensor as T
+import zipfile
 
 from cle.cle.data import DesignMatrix, TemporalSeries
 from cle.cle.data.prep import SequentialPrepMixin
 from cle.cle.utils import segment_axis, tolist, totuple
+
+from scipy.misc import imresize
 
 
 class DogsnCats(DesignMatrix, SequentialPrepMixin):
