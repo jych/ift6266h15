@@ -36,11 +36,6 @@ class DogsnCats(DesignMatrix, SequentialPrepMixin):
             return self.load_gray(data_path)
 
     def load_color(self, data_path, random_seed=123522):
-        # Check if dataset is in the data directory.
-        data_path = os.path.join(os.path.split(__file__)[0], "data")
-        if not os.path.exists(data_path):
-            os.makedirs(data_path)
-
         dataset = 'train.zip'
         data_file = os.path.join(data_path, dataset)
         if os.path.isfile(data_file):
@@ -135,12 +130,7 @@ class DogsnCats(DesignMatrix, SequentialPrepMixin):
         elif self.name == 'test':
             return (test_x, test_y)
 
-    def load_gray(data_path, random_seed=123522):
-        # Check if dataset is in the data directory.
-        data_path = os.path.join(os.path.split(__file__)[0], "data")
-        if not os.path.exists(data_path):
-            os.makedirs(data_path)
-
+    def load_gray(self, data_path, random_seed=123522):
         dataset = 'train.zip'
         data_file = os.path.join(data_path, dataset)
         if os.path.isfile(data_file):
