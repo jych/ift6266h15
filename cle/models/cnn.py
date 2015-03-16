@@ -21,8 +21,8 @@ from cle.cle.utils import error, predict
 from courseworks.ift6266h15.datasets.dogs_and_cats import DogsnCats
 
 
-datapath = '/home/junyoung/data/dogs_and_cats/'
-savepath = '/home/junyoung/repos/courseworks/ift6266h15/saved/'
+datapath = '/home/chungjun/data/dogs_and_cats/'
+savepath = '/home/chungjun/repos/courseworks/ift6266h15/saved/'
 
 batch_size = 128
 debug = 0
