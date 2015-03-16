@@ -1,6 +1,7 @@
 import ipdb
 import fnmatch
 import os
+import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
 import random
