@@ -90,7 +90,7 @@ class DogsnCats(DesignMatrix, SequentialPrepMixin):
             idx = random_state.permutation(len(matches))
             c = [0] * len(cat_matches)
             d = [1] * len(dog_matches)
-            y = np.array(c + d).astype('int32')
+            y = np.array(c + d).astype('float32')
             matches = matches[idx]
             y = y[idx]
 
@@ -118,11 +118,11 @@ class DogsnCats(DesignMatrix, SequentialPrepMixin):
         valid_y = y_s[20000:22500]
         test_y = y_s[22500:]
         test_x = test_x.astype('float32')
-        test_y = test_y.astype('int32')
+        test_y = test_y.astype('float32')[:, None]
         valid_x = valid_x.astype('float32')
-        valid_y = valid_y.astype('int32')
+        valid_y = valid_y.astype('float32')[:, None]
         train_x = train_x.astype('float32')
-        train_y = train_y.astype('int32')
+        train_y = train_y.astype('float32')[:, None]
 
         if self.name == 'train':
             return (train_x, train_y)
@@ -181,7 +181,7 @@ class DogsnCats(DesignMatrix, SequentialPrepMixin):
                                 for f in dog_matches])
             y_dog = np.ones((len(X_dog),))
             X = np.concatenate((X_cat, X_dog), axis=0).astype('float32')
-            y = np.concatenate((y_cat, y_dog), axis=0).astype('int32')
+            y = np.concatenate((y_cat, y_dog), axis=0).astype('float32')
             np.save(data_file, X)
             np.save(label_file, y)
         else:
@@ -200,11 +200,11 @@ class DogsnCats(DesignMatrix, SequentialPrepMixin):
         valid_y = y_s[20000:22500]
         test_y = y_s[22500:]
         test_x = test_x.astype('float32')
-        test_y = test_y.astype('int32')
+        test_y = test_y.astype('float32')[:, None]
         valid_x = valid_x.astype('float32')
-        valid_y = valid_y.astype('int32')
+        valid_y = valid_y.astype('float32')[:, None]
         train_x = train_x.astype('float32')
-        train_y = train_y.astype('int32')
+        train_y = train_y.astype('float32')[:, None]
 
         if self.name == 'train':
             return (train_x, train_y)
