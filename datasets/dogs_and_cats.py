@@ -27,10 +27,14 @@ class DogsnCats(DesignMatrix, SequentialPrepMixin):
         super(DogsnCats, self).__init__(**kwargs)
 
     def load(self, data_path):
+        if self.load_color:
+            return self.load_color(data_path)
+        else:
+            return self.load_gray(data_path)
 
     def load_color(self, data_path, random_seed=123522):
         # Check if dataset is in the data directory.
-        data_path = os.path.jo  in(os.path.split(__file__)[0], "data")
+        data_path = os.path.join(os.path.split(__file__)[0], "data")
         if not os.path.exists(data_path):
             os.makedirs(data_path)
 
@@ -107,9 +111,28 @@ class DogsnCats(DesignMatrix, SequentialPrepMixin):
         h5_file = tables.openFile(data_file, mode='r')
         X_s = h5_file.root.images
         y_s = np.load(label_file)
-        return (X_s, y_s)
 
-    def load_gray(random_seed=123522):
+        train_x = X_s[:20000]
+        valid_x = X_s[20000:22500]
+        test_x = X_s[22500:]
+        train_y = y_s[:20000]
+        valid_y = y_s[20000:22500]
+        test_y = y_s[22500:]
+        test_x = test_x.astype('float32')
+        test_y = test_y.astype('int32')
+        valid_x = valid_x.astype('float32')
+        valid_y = valid_y.astype('int32')
+        train_x = train_x.astype('float32')
+        train_y = train_y.astype('int32')
+
+        if self.name == 'train':
+            return (train_x, train_y)
+        elif self.name == 'valid':
+            return (valid_x, valid_y)
+        elif self.name == 'test':
+            return (test_x, test_y)
+
+    def load_gray(data_path, random_seed=123522):
         # Check if dataset is in the data directory.
         data_path = os.path.join(os.path.split(__file__)[0], "data")
         if not os.path.exists(data_path):
@@ -154,7 +177,7 @@ class DogsnCats(DesignMatrix, SequentialPrepMixin):
 
             def square_and_gray(X):
                 # From Roland
-                gray_consts = np.array([[0.299], [0.587], [0.144]])
+                gray_consts = np.array([[0.299], [0.587], [0.114]])
                 return imresize(X, (48, 48)).dot(gray_consts).squeeze()
 
             X_cat = np.asarray([square_and_gray(mpimg.imread(f))
@@ -189,8 +212,12 @@ class DogsnCats(DesignMatrix, SequentialPrepMixin):
         train_x = train_x.astype('float32')
         train_y = train_y.astype('int32')
 
-        rval = [(train_x, train_y), (valid_x, valid_y), (test_x, test_y)]
-        return rval
+        if self.name == 'train':
+            return (train_x, train_y)
+        elif self.name == 'valid':
+            return (valid_x, valid_y)
+        elif self.name == 'test':
+            return (test_x, test_y)
 
-if __name__ == "__main__":
-    train, valid, test = load_gray()
+    def theano_vars(self):
+        return [T.fmatrix('x'), T.fmatrix('y')]
