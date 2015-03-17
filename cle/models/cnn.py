@@ -108,8 +108,8 @@ nodes = [c1, c2, h1, h2, h3, h4, h5, p1, p2, p3]
 cnn = Net(inputs=inputs, inputs_dim=inputs_dim, nodes=nodes)
 cnn.build_graph()
 
-cost = NllBin(y, cnn.nodes['h6'].out).mean()
-err = error(T.ge(cnn.nodes['h6'].out, 0.5), y)
+cost = NllBin(y, cnn.nodes['h5'].out).mean()
+err = error(T.ge(cnn.nodes['h5'].out, 0.5), y)
 cost.name = 'cost'
 err.name = 'error_rate'
 model.graphs = [cnn]
