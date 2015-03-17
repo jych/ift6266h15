@@ -38,6 +38,11 @@ valdata = DogsnCats(name='valid',
                     use_color=1,
                     X_mean=trdata.X_mean,
                     X_std=trdata.X_std)
+testdata = DogsnCats(name='test',
+                     path=datapath,
+                     use_color=1,
+                     X_mean=trdata.X_mean,
+                     X_std=trdata.X_std)
 
 init_W = InitCell('rand')
 init_b = InitCell('zeros')
@@ -55,7 +60,7 @@ c1 = ConvertLayer(name='c1',
                   outshape=(batch_size, 3, 48, 48))
 h1 = Conv2DLayer(name='h1',
                  parent=['c1'],
-                 outshape=(batch_size, 64, 40, 40),
+                 outshape=(batch_size, 48, 40, 40),
                  unit='relu',
                  init_W=init_W,
                  init_b=init_b)
@@ -65,7 +70,7 @@ p1 = MaxPool2D(name='p1',
                poolstride=(2, 2))
 h2 = Conv2DLayer(name='h2',
                  parent=['p1'],
-                 outshape=(batch_size, 128, 16, 16),
+                 outshape=(batch_size, 96, 16, 16),
                  unit='relu',
                  init_W=init_W,
                  init_b=init_b)
@@ -75,7 +80,7 @@ p2 = MaxPool2D(name='p2',
                poolstride=(2, 2))
 h3 = Conv2DLayer(name='h3',
                  parent=['p2'],
-                 outshape=(batch_size, 128, 4, 4),
+                 outshape=(batch_size, 96, 4, 4),
                  unit='relu',
                  init_W=init_W,
                  init_b=init_b)
@@ -86,25 +91,25 @@ p3 = MaxPool2D(name='p3',
 c2 = ConvertLayer(name='c2',
                   parent=['p3'],
                   outshape=(batch_size, 256))
-h5 = FullyConnectedLayer(name='h5',
+h4 = FullyConnectedLayer(name='h4',
                          parent=['c2'],
-                         nout=512,
+                         nout=256,
+                         unit='relu',
+                         init_W=init_W,
+                         init_b=init_b)
+h5 = FullyConnectedLayer(name='h5',
+                         parent=['h4'],
+                         nout=256,
                          unit='relu',
                          init_W=init_W,
                          init_b=init_b)
 h6 = FullyConnectedLayer(name='h6',
                          parent=['h5'],
-                         nout=512,
-                         unit='relu',
-                         init_W=init_W,
-                         init_b=init_b)
-h7 = FullyConnectedLayer(name='h7',
-                         parent=['h6'],
                          nout=1,
                          unit='sigmoid',
                          init_W=init_W,
                          init_b=init_b)
-nodes = [c1, c2, h1, h2, h3, h4, h5, h6, h7, p1, p2, p3]
+nodes = [c1, c2, h1, h2, h3, h4, h5, h6, p1, p2, p3]
 
 cnn = Net(inputs=inputs, inputs_dim=inputs_dim, nodes=nodes)
 cnn.build_graph()
@@ -122,10 +127,11 @@ optimizer = Adam(
 extension = [
     GradientClipping(batch_size=batch_size),
     EpochCount(100),
-    Monitoring(freq=100,
+    Monitoring(freq=10,
                ddout=[cost, err],
                data=[Iterator(trdata, batch_size),
-                     Iterator(valdata, batch_size)]),
+                     Iterator(valdata, batch_size),
+                     Iterator(testdata, batch_size)]),
     Picklize(freq=1,
              path=savepath)
 ]
