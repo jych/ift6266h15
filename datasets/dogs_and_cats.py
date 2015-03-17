@@ -11,13 +11,13 @@ import theano.tensor as T
 import zipfile
 
 from cle.cle.data import DesignMatrix, TemporalSeries
-from cle.cle.data.prep import SequentialPrepMixin
+from cle.cle.data.prep import StaticPrepMixin
 from cle.cle.utils import segment_axis, tolist, totuple
 
 from scipy.misc import imresize
 
 
-class DogsnCats(DesignMatrix, SequentialPrepMixin):
+class DogsnCats(DesignMatrix, StaticPrepMixin):
     """
     Dogs and Cats dataset batch provider
 
@@ -25,13 +25,16 @@ class DogsnCats(DesignMatrix, SequentialPrepMixin):
     ----------
     .. todo::
     """
-    def __init__(self, load_color=0, prep='normalize', **kwargs):
+    def __init__(self, use_color=0, prep='normalize', X_mean=None,
+                 X_std=None, **kwargs):
         self.prep = prep
-        self.load_color = load_color
+        self.use_color = use_color
+        self.X_mean = X_mean
+        self.X_std = X_std
         super(DogsnCats, self).__init__(**kwargs)
 
     def load(self, data_path):
-        if self.load_color:
+        if self.use_color:
             return self.load_color(data_path)
         else:
             return self.load_gray(data_path)
@@ -117,18 +120,24 @@ class DogsnCats(DesignMatrix, SequentialPrepMixin):
         train_y = y_s[:20000]
         valid_y = y_s[20000:22500]
         test_y = y_s[22500:]
-        test_x = test_x.astype('float32')
+        test_x = test_x.astype('float32').reshape(test_x.shape[0], -1)
         test_y = test_y.astype('float32')[:, None]
-        valid_x = valid_x.astype('float32')
+        valid_x = valid_x.astype('float32').reshape(valid_x.shape[0], -1)
         valid_y = valid_y.astype('float32')[:, None]
-        train_x = train_x.astype('float32')
+        train_x = train_x.astype('float32').reshape(train_x.shape[0], -1)
         train_y = train_y.astype('float32')[:, None]
 
         if self.name == 'train':
+            train_x, self.X_mean, self.X_std =\
+                self.normalize(train_x, self.X_mean, self.X_std, 0)
             return (train_x, train_y)
         elif self.name == 'valid':
+            valid_x, self.X_mean, self.X_std =\
+                self.normalize(valid_x, self.X_mean, self.X_std, 0)
             return (valid_x, valid_y)
         elif self.name == 'test':
+            test_x, self.X_mean, self.X_std =\
+                self.normalize(test_x, self.X_mean, self.X_std, 0)
             return (test_x, test_y)
 
     def load_gray(self, data_path, random_seed=123522):
