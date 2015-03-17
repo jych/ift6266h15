@@ -60,7 +60,7 @@ c1 = ConvertLayer(name='c1',
                   outshape=(batch_size, 3, 48, 48))
 h1 = Conv2DLayer(name='h1',
                  parent=['c1'],
-                 outshape=(batch_size, 48, 40, 40),
+                 outshape=(batch_size, 32, 40, 40),
                  unit='relu',
                  init_W=init_W,
                  init_b=init_b)
@@ -70,7 +70,7 @@ p1 = MaxPool2D(name='p1',
                poolstride=(2, 2))
 h2 = Conv2DLayer(name='h2',
                  parent=['p1'],
-                 outshape=(batch_size, 96, 16, 16),
+                 outshape=(batch_size, 64, 16, 16),
                  unit='relu',
                  init_W=init_W,
                  init_b=init_b)
@@ -80,7 +80,7 @@ p2 = MaxPool2D(name='p2',
                poolstride=(2, 2))
 h3 = Conv2DLayer(name='h3',
                  parent=['p2'],
-                 outshape=(batch_size, 96, 4, 4),
+                 outshape=(batch_size, 64, 4, 4),
                  unit='relu',
                  init_W=init_W,
                  init_b=init_b)
@@ -121,7 +121,7 @@ err.name = 'error_rate'
 model.graphs = [cnn]
 
 optimizer = Adam(
-    lr=0.0001,
+    lr=0.00005,
 )
 
 extension = [
@@ -129,15 +129,14 @@ extension = [
     EpochCount(100),
     Monitoring(freq=10,
                ddout=[cost, err],
-               data=[Iterator(trdata, batch_size),
-                     Iterator(valdata, batch_size),
+               data=[Iterator(valdata, batch_size),
                      Iterator(testdata, batch_size)]),
     Picklize(freq=1,
              path=savepath)
 ]
 
 mainloop = Training(
-    name='cnn_without_pooling',
+    name='cnn',
     data=Iterator(trdata, batch_size),
     model=model,
     optimizer=optimizer,
