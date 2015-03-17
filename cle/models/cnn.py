@@ -60,7 +60,7 @@ c1 = ConvertLayer(name='c1',
                   outshape=(batch_size, 3, 48, 48))
 h1 = Conv2DLayer(name='h1',
                  parent=['c1'],
-                 outshape=(batch_size, 32, 40, 40),
+                 outshape=(batch_size, 32, 38, 38),
                  unit='relu',
                  init_W=init_W,
                  init_b=init_b)
@@ -70,7 +70,7 @@ p1 = MaxPool2D(name='p1',
                poolstride=(2, 2))
 h2 = Conv2DLayer(name='h2',
                  parent=['p1'],
-                 outshape=(batch_size, 64, 16, 16),
+                 outshape=(batch_size, 64, 12, 12),
                  unit='relu',
                  init_W=init_W,
                  init_b=init_b)
@@ -93,23 +93,17 @@ c2 = ConvertLayer(name='c2',
                   outshape=(batch_size, 256))
 h4 = FullyConnectedLayer(name='h4',
                          parent=['c2'],
-                         nout=256,
+                         nout=512,
                          unit='relu',
                          init_W=init_W,
                          init_b=init_b)
 h5 = FullyConnectedLayer(name='h5',
                          parent=['h4'],
-                         nout=256,
-                         unit='relu',
-                         init_W=init_W,
-                         init_b=init_b)
-h6 = FullyConnectedLayer(name='h6',
-                         parent=['h5'],
                          nout=1,
                          unit='sigmoid',
                          init_W=init_W,
                          init_b=init_b)
-nodes = [c1, c2, h1, h2, h3, h4, h5, h6, p1, p2, p3]
+nodes = [c1, c2, h1, h2, h3, h4, h5, p1, p2, p3]
 
 cnn = Net(inputs=inputs, inputs_dim=inputs_dim, nodes=nodes)
 cnn.build_graph()
@@ -121,7 +115,7 @@ err.name = 'error_rate'
 model.graphs = [cnn]
 
 optimizer = Adam(
-    lr=0.00005,
+    lr=0.0001,
 )
 
 extension = [
