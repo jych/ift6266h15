@@ -66,7 +66,7 @@ p1 = MaxPool2D(name='p1',
 h2 = Conv2DLayer(name='h2',
                  parent=['p1'],
                  parshape=[(batch_size, 64, 22, 22)],
-                 outshape=(batch_size, 64, 18, 18),
+                 outshape=(batch_size, 128, 18, 18),
                  unit='relu',
                  init_W=init_W,
                  init_b=init_b)
@@ -77,8 +77,8 @@ p2 = MaxPool2D(name='p2',
                set_shape=0)
 h3 = Conv2DLayer(name='h3',
                  parent=['p2'],
-                 parshape=[(batch_size, 64, 9, 9)],
-                 outshape=(batch_size, 32, 6, 6),
+                 parshape=[(batch_size, 128, 9, 9)],
+                 outshape=(batch_size, 128, 6, 6),
                  unit='relu',
                  init_W=init_W,
                  init_b=init_b)
@@ -89,26 +89,26 @@ p3 = MaxPool2D(name='p3',
                set_shape=0)
 c2 = ConvertLayer(name='c2',
                   parent=['h4'],
-                  outshape=(batch_size, 32*3*3))
+                  outshape=(batch_size, 128*3*3))
 h4 = FullyConnectedLayer(name='h4',
                          parent=['c2'],
-                         parent_dim=[288],
-                         nout=512,
+                         parent_dim=[1152],
+                         nout=1024,
                          unit='relu',
                          init_W=init_W,
                          init_b=init_b)
-d1 = DropoutLayer(name='d1', parent=['h4'], nout=512)
+d1 = DropoutLayer(name='d1', parent=['h4'], nout=1024)
 h5 = FullyConnectedLayer(name='h5',
                          parent=['d1'],
-                         parent_dim=[512],
-                         nout=512,
+                         parent_dim=[1024],
+                         nout=1024,
                          unit='relu',
                          init_W=init_W,
                          init_b=init_b)
-d2 = DropoutLayer(name='d2', parent=['h5'], nout=512)
+d2 = DropoutLayer(name='d2', parent=['h5'], nout=1024)
 h6 = FullyConnectedLayer(name='h6',
                          parent=['d2'],
-                         parent_dim=[512],
+                         parent_dim=[1024],
                          nout=1,
                          unit='sigmoid',
                          init_W=init_W,
@@ -173,7 +173,7 @@ extension = [
 ]
 
 mainloop = Training(
-    name='dogcat',
+    name='dogcat_L',
     data=Iterator(trdata, batch_size),
     model=model,
     optimizer=optimizer,
