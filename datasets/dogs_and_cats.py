@@ -26,11 +26,12 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
     .. todo::
     """
     def __init__(self, use_color=0, prep='normalize', X_mean=None,
-                 X_std=None, **kwargs):
+                 X_std=None, unsupervised=0, **kwargs):
         self.prep = prep
         self.use_color = use_color
         self.X_mean = X_mean
         self.X_std = X_std
+        self.unsupervised = unsupervised
         super(DogsnCats, self).__init__(**kwargs)
 
     def load(self, data_path):
@@ -128,17 +129,38 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
         train_y = train_y.astype('float32')[:, None]
 
         if self.name == 'train':
-            train_x, self.X_mean, self.X_std =\
-                self.normalize(train_x, self.X_mean, self.X_std, 0)
-            return (train_x, train_y)
+            if self.prep == 'normalize':
+                train_x, self.X_mean, self.X_std =\
+                    self.normalize(train_x, self.X_mean, self.X_std, 0)
+            elif self.prep == 'global_normalize':
+                train_x, self.X_mean, self.X_std =\
+                    self.global_normalize(train_x, self.X_mean, self.X_std)
+            if self.unsupervised:
+                return [train_x]
+            else:
+                return [train_x, train_y]
         elif self.name == 'valid':
-            valid_x, self.X_mean, self.X_std =\
-                self.normalize(valid_x, self.X_mean, self.X_std, 0)
-            return (valid_x, valid_y)
+            if self.prep == 'normalize':
+                valid_x, self.X_mean, self.X_std =\
+                    self.normalize(valid_x, self.X_mean, self.X_std, 0)
+            elif self.prep == 'global_normalize':
+                valid_x, self.X_mean, self.X_std =\
+                    self.global_normalize(valid_x, self.X_mean, self.X_std)
+            if self.unsupervised:
+                return [valid_x]
+            else:
+                return [valid_x, valid_y]
         elif self.name == 'test':
-            test_x, self.X_mean, self.X_std =\
-                self.normalize(test_x, self.X_mean, self.X_std, 0)
-            return (test_x, test_y)
+            if self.prep == 'normalize':
+                test_x, self.X_mean, self.X_std =\
+                    self.normalize(test_x, self.X_mean, self.X_std, 0)
+            elif self.prep == 'global_normalize':
+                test_x, self.X_mean, self.X_std =\
+                    self.global_normalize(test_x, self.X_mean, self.X_std)
+            if self.unsupervised:
+                return [test_x]
+            else:
+                return [test_x, test_y]
 
     def load_gray(self, data_path, random_seed=123522):
         dataset = 'train.zip'
@@ -216,11 +238,41 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
         train_y = train_y.astype('float32')[:, None]
 
         if self.name == 'train':
-            return (train_x, train_y)
+            if self.prep == 'normalize':
+                train_x, self.X_mean, self.X_std =\
+                    self.normalize(train_x, self.X_mean, self.X_std, 0)
+            elif self.prep == 'global_normalize':
+                train_x, self.X_mean, self.X_std =\
+                    self.global_normalize(train_x, self.X_mean, self.X_std)
+            if self.unsupervised:
+                return [train_x]
+            else:
+                return [train_x, train_y]
         elif self.name == 'valid':
-            return (valid_x, valid_y)
+            if self.prep == 'normalize':
+                valid_x, self.X_mean, self.X_std =\
+                    self.normalize(valid_x, self.X_mean, self.X_std, 0)
+            elif self.prep == 'global_normalize':
+                valid_x, self.X_mean, self.X_std =\
+                    self.global_normalize(valid_x, self.X_mean, self.X_std)
+            if self.unsupervised:
+                return [valid_x]
+            else:
+                return [valid_x, valid_y]
         elif self.name == 'test':
-            return (test_x, test_y)
+            if self.prep == 'normalize':
+                test_x, self.X_mean, self.X_std =\
+                    self.normalize(test_x, self.X_mean, self.X_std, 0)
+            elif self.prep == 'global_normalize':
+                test_x, self.X_mean, self.X_std =\
+                    self.global_normalize(test_x, self.X_mean, self.X_std)
+            if self.unsupervised:
+                return [test_x]
+            else:
+                return [test_x, test_y]
 
     def theano_vars(self):
-        return [T.fmatrix('x'), T.fmatrix('y')]
+        if self.unsupervised:
+            return T.fmatrix('x')
+        else:
+            return [T.fmatrix('x'), T.fmatrix('y')]

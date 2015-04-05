@@ -21,11 +21,11 @@ from cle.cle.train.ext import (
 )
 from cle.cle.train.opt import Adam
 from cle.cle.utils import error, flatten, predict
-from courseworks.ift6266h15.datasets.dogs_and_cats import DogsnCats
+from course_works.ift6266h15.datasets.dogs_and_cats import DogsnCats
 
 
 datapath = '/home/junyoung/data/dogs_and_cats/'
-savepath = '/home/junyoung/repos/courseworks/ift6266h15/saved/'
+savepath = '/home/junyoung/repos/course_works/ift6266h15/saved/'
 
 batch_size = 128
 debug = 1
