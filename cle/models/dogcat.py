@@ -88,7 +88,7 @@ p3 = MaxPool2D(name='p3',
                pool_stride=(2, 2),
                set_shape=0)
 c2 = ConvertLayer(name='c2',
-                  parent=['h4'],
+                  parent=['p3'],
                   outshape=(batch_size, 32*3*3))
 h4 = FullyConnectedLayer(name='h4',
                          parent=['c2'],
