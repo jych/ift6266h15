@@ -79,8 +79,8 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
             dog_matches = sorted(dog_matches, key=sort_key)
 
             def square(X):
-                resize_shape = (64, 64)
-                slice_size = (48, 48)
+                resize_shape = (40, 40)
+                slice_size = (32, 32)
                 slice_left = (resize_shape[0] - slice_size[0]) / 2
                 slice_upper = (resize_shape[1] - slice_size[1]) / 2
                 return imresize(X, resize_shape, interp='nearest')[
@@ -203,7 +203,7 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
             def square_and_gray(X):
                 # From Roland
                 gray_consts = np.array([[0.299], [0.587], [0.114]])
-                return imresize(X, (48, 48)).dot(gray_consts).squeeze()
+                return imresize(X, (32, 32)).dot(gray_consts).squeeze()
 
             X_cat = np.asarray([square_and_gray(mpimg.imread(f))
                                 for f in cat_matches])
