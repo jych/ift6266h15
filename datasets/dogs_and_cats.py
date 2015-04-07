@@ -26,12 +26,13 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
     .. todo::
     """
     def __init__(self, use_color=0, prep='normalize', X_mean=None,
-                 X_std=None, unsupervised=0, **kwargs):
+                 X_std=None, unsupervised=0, quadrisect=0, **kwargs):
         self.prep = prep
         self.use_color = use_color
         self.X_mean = X_mean
         self.X_std = X_std
         self.unsupervised = unsupervised
+        self.quadrisect = quadrisect
         super(DogsnCats, self).__init__(**kwargs)
 
     def load(self, data_path):
@@ -115,17 +116,21 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
         X_s = h5_file.root.images
         y_s = np.load(label_file)
 
-        train_x = X_s[:20000]
-        valid_x = X_s[20000:22500]
-        test_x = X_s[22500:]
-        train_y = y_s[:20000]
-        valid_y = y_s[20000:22500]
-        test_y = y_s[22500:]
-        test_x = test_x.astype('float32').reshape(test_x.shape[0], -1)
+        ntrain = 20000
+        nvalid = 2500
+        ntest = 2500
+
+        train_x = X_s[:ntrain]
+        valid_x = X_s[ntrain:ntrain+nvalid]
+        test_x = X_s[ntrain+nvalid:]
+        train_y = y_s[:ntrain]
+        valid_y = y_s[ntrain:ntrain+nvalid]
+        test_y = y_s[ntrain+nvalid:]
+        test_x = test_x.astype('float32').reshape(ntest, -1)
         test_y = test_y.astype('float32')[:, None]
-        valid_x = valid_x.astype('float32').reshape(valid_x.shape[0], -1)
+        valid_x = valid_x.astype('float32').reshape(nvalid, -1)
         valid_y = valid_y.astype('float32')[:, None]
-        train_x = train_x.astype('float32').reshape(train_x.shape[0], -1)
+        train_x = train_x.astype('float32').reshape(ntrain, -1)
         train_y = train_y.astype('float32')[:, None]
 
         if self.name == 'train':
@@ -135,6 +140,14 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
             elif self.prep == 'global_normalize':
                 train_x, self.X_mean, self.X_std =\
                     self.global_normalize(train_x, self.X_mean, self.X_std)
+            if self.quadrisect:
+                train_x = train_x.reshape((ntrain, 3, 32, 32))
+                A = train_x[:, :, :16, :16].reshape(ntrain, -1)
+                B = train_x[:, :, :16, 16:].reshape(ntrain, -1)
+                C = train_x[:, :, 16:, :16].reshape(ntrain, -1)
+                D = train_x[:, :, 16:, 16:].reshape(ntrain, -1)
+                E = np.concatenate([A, B, C, D], axis=1)
+                train_x = E.reshape((ntrain, 4, -1))
             if self.unsupervised:
                 return [train_x]
             else:
@@ -146,6 +159,14 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
             elif self.prep == 'global_normalize':
                 valid_x, self.X_mean, self.X_std =\
                     self.global_normalize(valid_x, self.X_mean, self.X_std)
+            if self.quadrisect:
+                valid_x = valid_x.reshape((nvalid, 3, 32, 32))
+                A = valid_x[:, :, :16, :16].reshape(nvalid, -1)
+                B = valid_x[:, :, :16, 16:].reshape(nvalid, -1)
+                C = valid_x[:, :, 16:, :16].reshape(nvalid, -1)
+                D = valid_x[:, :, 16:, 16:].reshape(nvalid, -1)
+                E = np.concatenate([A, B, C, D], axis=1)
+                valid_x = E.reshape((nvalid, 4, -1))
             if self.unsupervised:
                 return [valid_x]
             else:
@@ -157,6 +178,14 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
             elif self.prep == 'global_normalize':
                 test_x, self.X_mean, self.X_std =\
                     self.global_normalize(test_x, self.X_mean, self.X_std)
+            if self.quadrisect:
+                test_x = test_x.reshape((ntest, 3, 32, 32))
+                A = test_x[:, :, :16, :16].reshape(ntest, -1)
+                B = test_x[:, :, :16, 16:].reshape(ntest, -1)
+                C = test_x[:, :, 16:, :16].reshape(ntest, -1)
+                D = test_x[:, :, 16:, 16:].reshape(ntest, -1)
+                E = np.concatenate([A, B, C, D], axis=1)
+                test_x = E.reshape((ntest, 4, -1))
             if self.unsupervised:
                 return [test_x]
             else:
@@ -224,17 +253,21 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
         X_s = X[idx].reshape(len(X), -1)
         y_s = y[idx]
 
-        train_x = X_s[:20000]
-        valid_x = X_s[20000:22500]
-        test_x = X_s[22500:]
-        train_y = y_s[:20000]
-        valid_y = y_s[20000:22500]
-        test_y = y_s[22500:]
-        test_x = test_x.astype('float32')
+        ntrain = 20000
+        nvalid = 2500
+        ntest = 2500
+
+        train_x = X_s[:ntrain]
+        valid_x = X_s[ntrain:ntrain+nvalid]
+        test_x = X_s[ntrain+nvalid:]
+        train_y = y_s[:ntrain]
+        valid_y = y_s[ntrain:ntrain+nvalid]
+        test_y = y_s[ntrain+nvalid:]
+        test_x = test_x.astype('float32').reshape(ntest, -1)
         test_y = test_y.astype('float32')[:, None]
-        valid_x = valid_x.astype('float32')
+        valid_x = valid_x.astype('float32').reshape(nvalid, -1)
         valid_y = valid_y.astype('float32')[:, None]
-        train_x = train_x.astype('float32')
+        train_x = train_x.astype('float32').reshape(ntrain, -1)
         train_y = train_y.astype('float32')[:, None]
 
         if self.name == 'train':
@@ -244,6 +277,14 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
             elif self.prep == 'global_normalize':
                 train_x, self.X_mean, self.X_std =\
                     self.global_normalize(train_x, self.X_mean, self.X_std)
+            if self.quadrisect:
+                train_x = train_x.reshape((ntrain, 32, 32))
+                A = train_x[:, :16, :16].reshape(ntrain, -1)
+                B = train_x[:, :16, 16:].reshape(ntrain, -1)
+                C = train_x[:, 16:, :16].reshape(ntrain, -1)
+                D = train_x[:, 16:, 16:].reshape(ntrain, -1)
+                E = np.concatenate([A, B, C, D], axis=1)
+                train_x = E.reshape((ntrain, 4, -1))
             if self.unsupervised:
                 return [train_x]
             else:
@@ -255,6 +296,14 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
             elif self.prep == 'global_normalize':
                 valid_x, self.X_mean, self.X_std =\
                     self.global_normalize(valid_x, self.X_mean, self.X_std)
+            if self.quadrisect:
+                valid_x = valid_x.reshape((nvalid, 32, 32))
+                A = valid_x[:, :16, :16].reshape(nvalid, -1)
+                B = valid_x[:, :16, 16:].reshape(nvalid, -1)
+                C = valid_x[:, 16:, :16].reshape(nvalid, -1)
+                D = valid_x[:, 16:, 16:].reshape(nvalid, -1)
+                E = np.concatenate([A, B, C, D], axis=1)
+                valid_x = E.reshape((nvalid, 4, -1))
             if self.unsupervised:
                 return [valid_x]
             else:
@@ -266,6 +315,14 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
             elif self.prep == 'global_normalize':
                 test_x, self.X_mean, self.X_std =\
                     self.global_normalize(test_x, self.X_mean, self.X_std)
+            if self.quadrisect:
+                test_x = test_x.reshape((ntest, 32, 32))
+                A = test_x[:, :16, :16].reshape(ntest, -1)
+                B = test_x[:, :16, 16:].reshape(ntest, -1)
+                C = test_x[:, 16:, :16].reshape(ntest, -1)
+                D = test_x[:, 16:, 16:].reshape(ntest, -1)
+                E = np.concatenate([A, B, C, D], axis=1)
+                test_x = E.reshape((ntest, 4, -1))
             if self.unsupervised:
                 return [test_x]
             else:
@@ -273,6 +330,12 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
 
     def theano_vars(self):
         if self.unsupervised:
-            return T.fmatrix('x')
+            if self.quadrisect:
+                return T.ftensor3('x')
+            else:
+                return T.fmatrix('x')
         else:
-            return [T.fmatrix('x'), T.fmatrix('y')]
+            if self.quadrisect:
+                return [T.ftensor3('x'), T.fmatrix('y')]
+            else:
+                return [T.fmatrix('x'), T.fmatrix('y')]
