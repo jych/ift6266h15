@@ -199,35 +199,35 @@ params = flatten([node.get_params().values() for node in nodes])
 
 def inner_fn(enc_tm1, dec_tm1, canvas_mu_tm1, canvas_sig_tm1, x):
 
-    sampling_out = sampling.fprop([canvas_mu_tm1, canvas_sig_tm1])
-    error_out = error.fprop([[x], [sampling_out]])
+    sampling_t = sampling.fprop([canvas_mu_tm1, canvas_sig_tm1])
+    error_t = error.fprop([[x], [sampling_t]])
 
-    read_param_out = read_param.fprop([dec_tm1])
-    read_out = read.fprop([x, error_out, read_param_out])
+    read_param_t = read_param.fprop([dec_tm1])
+    read_t = read.fprop([x, error_t, read_param_t])
 
-    enc_out = enc.fprop([[read_out], [enc_tm1, dec_tm1]])
+    enc_t = enc.fprop([[read_t], [enc_tm1, dec_tm1]])
 
-    phi_mu_out = phi_mu.fprop([enc_out])
-    phi_sig_out = phi_sig.fprop([enc_out])
+    phi_mu_t = phi_mu.fprop([enc_t])
+    phi_sig_t = phi_sig.fprop([enc_t])
 
-    prior_out = prior.fprop([phi_mu_out, phi_sig_out])
-    kl_out = kl.fprop([phi_mu_out, phi_sig_out])
+    prior_t = prior.fprop([phi_mu_t, phi_sig_t])
+    kl_t = kl.fprop([phi_mu_t, phi_sig_t])
 
-    dec_out = dec.fprop([[prior_out], [dec_tm1]])
+    dec_t = dec.fprop([[prior_t], [dec_tm1]])
 
-    w_out = w.fprop([dec_out])
-    w_sig_out = w_sig.fprop([dec_out])
+    w_t = w.fprop([dec_t])
+    w_sig_t = w_sig.fprop([dec_t])
 
-    write_param_out = write_param.fprop([dec_out])
-    write_out = write.fprop([w_out, write_param_out])
-    write_sig_out = write.fprop([w_sig_out, write_param_out])
+    write_param_t = write_param.fprop([dec_t])
+    write_t = write.fprop([w_t, write_param_t])
+    write_sig_t = write.fprop([w_sig_t, write_param_t])
 
-    canvas_mu_out = canvas_mu.fprop([[write_out], [canvas_mu_tm1]])
-    canvas_sig_out = canvas_sig.fprop([[write_sig_out], [canvas_sig_tm1]])
+    canvas_mu_t = canvas_mu.fprop([[write_t], [canvas_mu_tm1]])
+    canvas_sig_t = canvas_sig.fprop([[write_sig_t], [canvas_sig_tm1]])
 
-    return enc_out, dec_out, canvas_mu_out, canvas_sig_out, kl_out, phi_sig_out
+    return enc_t, dec_t, canvas_mu_t, canvas_sig_t, kl_t, phi_sig_t
 
-((enc_out, dec_out, canvas_mu_out, canvas_sig_out, kl_out, phi_sig_out), updates) =\
+((enc_t, dec_t, canvas_mu_t, canvas_sig_t, kl_t, phi_sig_t), updates) =\
     theano.scan(fn=inner_fn,
                 outputs_info=[enc.get_init_state(),
                               dec.get_init_state(),
@@ -239,33 +239,35 @@ def inner_fn(enc_tm1, dec_tm1, canvas_mu_tm1, canvas_sig_tm1, x):
 for k, v in updates.iteritems():
     k.default_update = v
 
-recon_term = Gaussian(x, canvas_mu_out[-1], canvas_sig_out[-1]).mean()
-kl_term = kl_out.sum(axis=0).mean()
+canvas_mu_T = canvas_mu_t[-1]
+canvas_sig_T = canvas_sig_t[-1]
+recon_term = Gaussian(x, canvas_mu_T, canvas_sig_T).mean()
+kl_term = kl_t.sum(axis=0).mean()
 cost = recon_term + kl_term
 cost.name = 'cost'
 recon_term.name = 'recon_term'
 kl_term.name = 'kl_term'
-recon_err = ((x - canvas_mu_out[-1])**2).mean() / x.std()
+recon_err = ((x - canvas_mu_T)**2).mean() / x.std()
 recon_err.name = 'recon_err'
 
 # monitoring attributes
-max_phi_sig = phi_sig_out.max()
-mean_phi_sig = phi_sig_out.mean()
-min_phi_sig = phi_sig_out.min()
+max_phi_sig = phi_sig_t.max()
+mean_phi_sig = phi_sig_t.mean()
+min_phi_sig = phi_sig_t.min()
 max_phi_sig.name = 'max_phi_sig'
 mean_phi_sig.name = 'mean_phi_sig'
 min_phi_sig.name = 'min_phi_sig'
 
-max_canvas_sig = canvas_sig_out[-1].max()
-mean_canvas_sig = canvas_sig_out[-1].mean()
-min_canvas_sig = canvas_sig_out[-1].min()
+max_canvas_sig = canvas_sig_T.max()
+mean_canvas_sig = canvas_sig_T.mean()
+min_canvas_sig = canvas_sig_T.min()
 max_canvas_sig.name = 'max_canvas_sig'
 mean_canvas_sig.name = 'mean_canvas_sig'
 min_canvas_sig.name = 'min_canvas_sig'
 
-max_canvas_mu = canvas_mu_out[-1].max()
-mean_canvas_mu = canvas_mu_out[-1].mean()
-min_canvas_mu = canvas_mu_out[-1].min()
+max_canvas_mu = canvas_mu_T.max()
+mean_canvas_mu = canvas_mu_T.mean()
+min_canvas_mu = canvas_mu_T.min()
 max_canvas_mu.name = 'max_canvas_mu'
 mean_canvas_mu.name = 'mean_canvas_mu'
 min_canvas_mu.name = 'min_canvas_mu'
