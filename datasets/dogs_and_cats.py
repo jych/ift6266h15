@@ -339,3 +339,14 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
                 return [T.ftensor3('x'), T.fmatrix('y')]
             else:
                 return [T.fmatrix('x'), T.fmatrix('y')]
+
+
+if __name__ == "__main__":
+    datapath = '/home/junyoung/data/dogs_and_cats/'
+    savepath = '/home/junyoung/repos/course_works/ift6266h15/saved/'
+    use_color = 1
+    data = DogsnCats(name='train',
+                     path=datapath,
+                     use_color=use_color,
+                     prep='global_normalize')
+    ipdb.set_trace()
