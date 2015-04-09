@@ -80,8 +80,10 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
             dog_matches = sorted(dog_matches, key=sort_key)
 
             def square(X):
-                resize_shape = (40, 40)
-                slice_size = (32, 32)
+                #resize_shape = (40, 40)
+                #slice_size = (32, 32)
+                resize_shape = (64, 64)
+                slice_size = (48, 48)
                 slice_left = (resize_shape[0] - slice_size[0]) / 2
                 slice_upper = (resize_shape[1] - slice_size[1]) / 2
                 return imresize(X, resize_shape, interp='nearest')[
@@ -116,20 +118,22 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
         X_s = h5_file.root.images
         y_s = np.load(label_file)
 
-        ntrain = 20000
-        nvalid = 2500
+        #ntrain = 20000
+        ntrain = 22500
+        #nvalid = 2500
+        nvalid = 0
         ntest = 2500
 
         train_x = X_s[:ntrain]
-        valid_x = X_s[ntrain:ntrain+nvalid]
+        #valid_x = X_s[ntrain:ntrain+nvalid]
         test_x = X_s[ntrain+nvalid:]
         train_y = y_s[:ntrain]
-        valid_y = y_s[ntrain:ntrain+nvalid]
+        #valid_y = y_s[ntrain:ntrain+nvalid]
         test_y = y_s[ntrain+nvalid:]
         test_x = test_x.astype('float32').reshape(ntest, -1)
         test_y = test_y.astype('float32')[:, None]
-        valid_x = valid_x.astype('float32').reshape(nvalid, -1)
-        valid_y = valid_y.astype('float32')[:, None]
+        #valid_x = valid_x.astype('float32').reshape(nvalid, -1)
+        #valid_y = valid_y.astype('float32')[:, None]
         train_x = train_x.astype('float32').reshape(ntrain, -1)
         train_y = train_y.astype('float32')[:, None]
 
