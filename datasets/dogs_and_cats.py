@@ -342,6 +342,7 @@ class DogsnCats(DesignMatrix, StaticPrepMixin):
 
 
 if __name__ == "__main__":
+    #datapath = '/home/chungjun/data/dogs_and_cats/'
     datapath = '/home/junyoung/data/dogs_and_cats/'
     use_color = 1
     data = DogsnCats(name='train',
